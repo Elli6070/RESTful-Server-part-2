@@ -1,0 +1,18 @@
+{
+  "name": "Project-3-RESTful-Server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Drew Elliott, Alex Yurevich",
+  "license": "ISC",
+  "dependencies": {
+    "js2xmlparser": "^4.0.0",
+    "sqlite3": "^4.1.0",
+    "vue": "^2.6.10",
+    "xml-js": "^1.6.11"
+  }
+}
