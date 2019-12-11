@@ -3,7 +3,7 @@ var path = require('path')
 var express = require('express')
 var sqlite3 = require('sqlite3')
 var bodyParser = require('body-parser');
-
+var cors = require('cors');
 var xml = require('xml-js');
 var js2xmlparser = require("js2xmlparser");
 
@@ -26,7 +26,7 @@ var db = new sqlite3.Database(db_filename, sqlite3, (err) => {
 
 var app = express();
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(cors());
 app.get('/', (req, res) => {
 	res.sendFile(client_file);
 });

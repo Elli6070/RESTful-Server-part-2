@@ -4,6 +4,7 @@
 	<title>Quick Start - Leaflet</title>
 
 	<script src="https://unpkg.com/vue"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
 
@@ -11,38 +12,20 @@
 <body>
 
 <div id="app">
-    <img src="https://vuejs.org/images/logo.png" alt="Vue logo">
-    <h1>{{ greeting }}</h1>
     <ul>
       <li>
-        To learn more about Vue, visit
-        <a :href="docsURL" target="_blank">
-          {{ humanizeURL(docsURL) }}
-        </a>
-      </li>
-      <li>
-        For live help with simple questions, check out
-        <a :href="discordURL" target="_blank">
-          the Discord chat
-        </a>
-      </li>
-      <li>
-        For more complex questions, post to
-        <a :href="forumURL" target="_blank">
-          the forum
-        </a>
-      </li>
+		{{ incidents }}
+	  </li>
     </ul>
   </div>
 
   <script>
     var app = new Vue({
       el: '#app',
-      data: {
-        greeting: 'Welcome to your Vue.js app!',
-        docsURL: 'http://vuejs.org/guide/',
-        discordURL: 'https://chat.vuejs.org',
-        forumURL: 'http://forum.vuejs.org/'
+      
+	  data: {
+        
+		incidents: null
       },
       methods: {
         humanizeURL: function (url) {
@@ -50,21 +33,89 @@
             .replace(/^https?:\/\//, '')
             .replace(/\/$/, '')
         }
-      }
+      },
+	  mounted (){
+		axios.get("http://cisc-dean.stthomas.edu:8027/incidents?start_date=2019-10-01&end_date=2019-10-31")
+		.then((response) => {
+			console.log("Got Data");
+			this.incidents = response;
+		})
+	  }
     })
   </script>
 
 <div id="mapid" style="width: 600px; height: 400px;"></div>
 <script>
-	var mymap = L.map('mapid').setView([51.505, -0.09], 13);
-
+	var mymap = L.map('mapid').setView([44.955723, -93.106056], 13);
+	
+	var corner1 = L.latLng(44.989484, -93.209396);
+	corner2 = L.latLng(44.890331, -93.001686);
+	bounds = L.latLngBounds(corner1, corner2);
+	
 	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
 			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		id: 'mapbox/streets-v11'
+		id: 'mapbox/streets-v11',
+		minZoom: 11,
+		maxZoom: 18,
+		maxBounds: bounds
 	}).addTo(mymap);
+	mymap.setMaxBounds(mymap.getBounds());
+	
+	
+	var Conway = L.marker([44.916959, -93.025327]).addTo(mymap);
+	Conway.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var GES = L.marker([44.928323, -93.025327]).addTo(mymap);
+	GES.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var WestSide = L.marker([44.930028, -93.080447]).addTo(mymap);
+	WestSide.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Dayton = L.marker([44.956010, -93.058301]).addTo(mymap);
+	Dayton.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Payne = L.marker([44.980341, -93.071940]).addTo(mymap);
+	Payne.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var NorthEnd = L.marker([44.976798, -93.111655]).addTo(mymap);
+	NorthEnd.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var ThomasDale = L.marker([44.963089, -93.147793]).addTo(mymap);
+	ThomasDale.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Summit = L.marker([44.948611, -93.126360]).addTo(mymap);
+	Summit.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var WestSeventh = L.marker([44.932707, -93.119739]).addTo(mymap);
+	WestSeventh.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Como = L.marker([44.981661, -93.148235]).addTo(mymap);
+	Como.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Hamline = L.marker([44.961778, -93.167119]).addTo(mymap);
+	Hamline.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var StAnthony = L.marker([44.973546, -93.197621]).addTo(mymap);
+	StAnthony.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var UnionPark = L.marker([44.949164, -93.174827]).addTo(mymap);
+	UnionPark.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Macalaster = L.marker([44.934240, -93.174333]).addTo(mymap);
+	Macalaster.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var Highland = L.marker([44.910549, -93.177474]).addTo(mymap);
+	Highland.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var SummitHill = L.marker([44.939011, -93.138885]).addTo(mymap);
+	SummitHill.bindPopup("<b>Hello world!</b><br>.").openPopup();
+	
+	var CapitolRiver = L.marker([44.947381, -93.091022]).addTo(mymap);
+	CapitolRiver.bindPopup("<b>Hello world!</b><br>.").openPopup();
+
 </script>
 
 </body>
