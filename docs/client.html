@@ -52,23 +52,23 @@
 	function Init(crime_api_url) {
 		console.log("getting crime data at: " + crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31");
 		let neighborhoodMap = {
-			1: {"neighborhood": "Conway", "crime_number": 0, "isVisible": true},
-			2: {"neighborhood": "Greater East Side", "crime_number": 0, "isVisible": true},
-			3: {"neighborhood": "West Side", "crime_number": 0, "isVisible": true},
-			4: {"neighborhood": "Dayton's Bluff", "crime_number": 0, "isVisible": true},
-			5: {"neighborhood": "Payne/Phalen", "crime_number": 0, "isVisible": true},
-			6: {"neighborhood": "North End", "crime_number": 0, "isVisible": true},
-			7: {"neighborhood": "Thomas/Dale(Frogtown)", "crime_number": 0, "isVisible": true},
-			8: {"neighborhood": "Summit/University", "crime_number": 0, "isVisible": true},
-			9: {"neighborhood": "West Seventh", "crime_number": 0, "isVisible": true},
-			10: {"neighborhood": "Como", "crime_number": 0, "isVisible": true},
-			11: {"neighborhood": "Hamline/Midway", "crime_number": 0, "isVisible": true},
-			12: {"neighborhood": "St. Anthony", "crime_number": 0, "isVisible": true},
-			13: {"neighborhood": "Union Park", "crime_number": 0, "isVisible": true},
-			14: {"neighborhood": "Macalaster-Groveland", "crime_number": 0, "isVisible": true},
-			15: {"neighborhood": "Highland", "crime_number": 0, "isVisible": true},
-			16: {"neighborhood": "Summit Hill", "crime_number": 0, "isVisible": true},
-			17: {"neighborhood": "Capitol River", "crime_number": 0, "isVisible": true}
+			1: {"neighborhood": "Conway", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.916959, -93.025327])},
+			2: {"neighborhood": "Greater East Side", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.928323, -93.025327])},
+			3: {"neighborhood": "West Side", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.930028, -93.080447])},
+			4: {"neighborhood": "Dayton's Bluff", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.956010, -93.058301])},
+			5: {"neighborhood": "Payne/Phalen", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.980341, -93.071940])},
+			6: {"neighborhood": "North End", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.976798, -93.111655])},
+			7: {"neighborhood": "Thomas/Dale(Frogtown)", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.963089, -93.147793])},
+			8: {"neighborhood": "Summit/University", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.948611, -93.126360])},
+			9: {"neighborhood": "West Seventh", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.932707, -93.119739])},
+			10: {"neighborhood": "Como", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.981661, -93.148235])},
+			11: {"neighborhood": "Hamline/Midway", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.961778, -93.167119])},
+			12: {"neighborhood": "St. Anthony", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.973546, -93.197621])},
+			13: {"neighborhood": "Union Park", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.949164, -93.174827])},
+			14: {"neighborhood": "Macalaster-Groveland", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.934240, -93.174333])},
+			15: {"neighborhood": "Highland", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.910549, -93.177474])},
+			16: {"neighborhood": "Summit Hill", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.939011, -93.138885])},
+			17: {"neighborhood": "Capitol River", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.947381, -93.091022])}
 		};
 		let currentBounds = L.latLngBounds(L.latLng(44.989484, -93.209396), L.latLng(44.890331, -93.001686));
 		
@@ -89,19 +89,19 @@
 				.then((response) => {
 					console.log("Retrieved Data");
 					this.incidents = response;
-					populateMap(this.incidents["data"]);
+					mapInit(this.incidents["data"], neighborhoodMap, currentBounds);
 				})
 			}
 		})
 	}
 
-	function populateMap(incidents) {
+	function mapInit(incidents, neighborhoodMap, currentBounds) {
 		console.log("Populating map");
-		console.log(currentBounds);
 		var mymap = L.map('mapid').setView([44.955723, -93.106056], 13);
 		var corner1 = L.latLng(44.989484, -93.209396);
 		var corner2 = L.latLng(44.890331, -93.001686);
 		var bounds = L.latLngBounds(corner1, corner2);
+		console.log(bounds);
 		
 		L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -119,64 +119,73 @@
 				neighborhoodMap[incidents[key].neighborhood_number]["crime_number"]++;
 			}
 		}
+		for(neighborhood in neighborhoodMap){
+			var popup = neighborhoodMap[neighborhood].coordinates.addTo(mymap);
+			popup.bindPopup("<b># Crimes: " + neighborhoodMap[neighborhood].crime_number + "</b><br>.").openPopup();
+		}
 		
-		var Conway = L.marker([44.916959, -93.025327]).addTo(mymap);
-		Conway.bindPopup("<b># Crimes: " + neighborhoodMap[1] + "</b><br>.").openPopup();
+		/*var Conway = neighborhoodMap[1].coordinates.addTo(mymap);
+		Conway.bindPopup("<b># Crimes: " + neighborhoodMap[1].crime_number + "</b><br>.").openPopup();
 		
-		var GES = L.marker([44.928323, -93.025327]).addTo(mymap);
-		GES.bindPopup("<b># Crimes: " + neighborhoodMap[2] + "</b><br>.").openPopup();
+		var GES = neighborhoodMap[2].coordinates.addTo(mymap);
+		GES.bindPopup("<b># Crimes: " + neighborhoodMap[2].crime_number + "</b><br>.").openPopup();
 		
-		var WestSide = L.marker([44.930028, -93.080447]).addTo(mymap);
-		WestSide.bindPopup("<b># Crimes: " + neighborhoodMap[3] + "</b><br>.").openPopup();
+		var WestSide = neighborhoodMap[3].coordinates.addTo(mymap);
+		WestSide.bindPopup("<b># Crimes: " + neighborhoodMap[3].crime_number + "</b><br>.").openPopup();
 		
-		var Dayton = L.marker([44.956010, -93.058301]).addTo(mymap);
-		Dayton.bindPopup("<b># Crimes: " + neighborhoodMap[4] + "</b><br>.").openPopup();
+		var Dayton = neighborhoodMap[4].coordinates.addTo(mymap);
+		Dayton.bindPopup("<b># Crimes: " + neighborhoodMap[4].crime_number + "</b><br>.").openPopup();
 		
-		var Payne = L.marker([44.980341, -93.071940]).addTo(mymap);
-		Payne.bindPopup("<b># Crimes: " + neighborhoodMap[5] + "</b><br>.").openPopup();
+		var Payne = neighborhoodMap[5].coordinates.addTo(mymap);
+		Payne.bindPopup("<b># Crimes: " + neighborhoodMap[5].crime_number + "</b><br>.").openPopup();
 		
-		var NorthEnd = L.marker([44.976798, -93.111655]).addTo(mymap);
-		NorthEnd.bindPopup("<b># Crimes: " + neighborhoodMap[6] + "</b><br>.").openPopup();
+		var NorthEnd = neighborhoodMap[6].coordinates.addTo(mymap);
+		NorthEnd.bindPopup("<b># Crimes: " + neighborhoodMap[6].crime_number + "</b><br>.").openPopup();
 		
-		var ThomasDale = L.marker([44.963089, -93.147793]).addTo(mymap);
-		ThomasDale.bindPopup("<b># Crimes: " + neighborhoodMap[7] + "</b><br>.").openPopup();
+		var ThomasDale = neighborhoodMap[7].coordinates.addTo(mymap);
+		ThomasDale.bindPopup("<b># Crimes: " + neighborhoodMap[7].crime_number + "</b><br>.").openPopup();
 		
-		var Summit = L.marker([44.948611, -93.126360]).addTo(mymap);
-		Summit.bindPopup("<b># Crimes: " + neighborhoodMap[8] + "</b><br>.").openPopup();
+		var Summit = neighborhoodMap[8].coordinates.addTo(mymap);
+		Summit.bindPopup("<b># Crimes: " + neighborhoodMap[8].crime_number + "</b><br>.").openPopup();
 		
-		var WestSeventh = L.marker([44.932707, -93.119739]).addTo(mymap);
-		WestSeventh.bindPopup("<b># Crimes: " + neighborhoodMap[9] + "</b><br>.").openPopup();
+		var WestSeventh = neighborhoodMap[9].coordinates.addTo(mymap);
+		WestSeventh.bindPopup("<b># Crimes: " + neighborhoodMap[9].crime_number + "</b><br>.").openPopup();
 		
-		var Como = L.marker([44.981661, -93.148235]).addTo(mymap);
-		Como.bindPopup("<b># Crimes: " + neighborhoodMap[10] + "</b><br>.").openPopup();
+		var Como = neighborhoodMap[10].coordinates.addTo(mymap);
+		Como.bindPopup("<b># Crimes: " + neighborhoodMap[10].crime_number + "</b><br>.").openPopup();
 		
-		var Hamline = L.marker([44.961778, -93.167119]).addTo(mymap);
-		Hamline.bindPopup("<b># Crimes: " + neighborhoodMap[11] + "</b><br>.").openPopup();
+		var Hamline = neighborhoodMap[11].coordinates.addTo(mymap);
+		Hamline.bindPopup("<b># Crimes: " + neighborhoodMap[11].crime_number + "</b><br>.").openPopup();
 		
-		var StAnthony = L.marker([44.973546, -93.197621]).addTo(mymap);
-		StAnthony.bindPopup("<b># Crimes: " + neighborhoodMap[12] + "</b><br>.").openPopup();
+		var StAnthony = neighborhoodMap[12].coordinates.addTo(mymap);
+		StAnthony.bindPopup("<b># Crimes: " + neighborhoodMap[12].crime_number + "</b><br>.").openPopup();
 		
-		var UnionPark = L.marker([44.949164, -93.174827]).addTo(mymap);
-		UnionPark.bindPopup("<b># Crimes: " + neighborhoodMap[13] + "</b><br>.").openPopup();
+		var UnionPark = neighborhoodMap[13].coordinates.addTo(mymap);
+		UnionPark.bindPopup("<b># Crimes: " + neighborhoodMap[13].crime_number + "</b><br>.").openPopup();
 		
-		var Macalaster = L.marker([44.934240, -93.174333]).addTo(mymap);
-		Macalaster.bindPopup("<b># Crimes: " + neighborhoodMap[14] + "</b><br>.").openPopup();
+		var Macalaster = neighborhoodMap[14].coordinates.addTo(mymap);
+		Macalaster.bindPopup("<b># Crimes: " + neighborhoodMap[14].crime_number + "</b><br>.").openPopup();
 		
-		var Highland = L.marker([44.910549, -93.177474]).addTo(mymap);
-		Highland.bindPopup("<b># Crimes: " + neighborhoodMap[15] + "</b><br>.").openPopup();
+		var Highland = neighborhoodMap[15].coordinates.addTo(mymap);
+		Highland.bindPopup("<b># Crimes: " + neighborhoodMap[15].crime_number + "</b><br>.").openPopup();
 		
-		var SummitHill = L.marker([44.939011, -93.138885]).addTo(mymap);
-		SummitHill.bindPopup("<b># Crimes: " + neighborhoodMap[16] + "</b><br>.").openPopup();
+		var SummitHill = neighborhoodMap[16].coordinates.addTo(mymap);
+		SummitHill.bindPopup("<b># Crimes: " + neighborhoodMap[16].crime_number + "</b><br>.").openPopup();
 		
-		var CapitolRiver = L.marker([44.947381, -93.091022]).addTo(mymap);
-		CapitolRiver.bindPopup("<b># Crimes: " + neighborhoodMap[17] + "</b><br>.").openPopup();
+		var CapitolRiver = neighborhoodMap[17].coordinates.addTo(mymap);
+		CapitolRiver.bindPopup("<b># Crimes: " + neighborhoodMap[17].crime_number + "</b><br>.").openPopup();*/
 		
-		var bounds = L.latLngBounds(L.latLng(mymap.getNorth(), mymap.getWest()), L.latLng(mymap.getSouth(), mymap.getEast()));
-		console.log(bounds);
+		var newCurrentBounds = mymap.getBounds();
+		console.log(newCurrentBounds);
+		currentBounds = newCurrentBounds;
 	}
 
-	function getVisibleNeighborhoods(){
-		
+	function setVisibleNeighborhoods(neighborhoodMap, currentBounds){
+		for(neighborhood in neighborhoodMap){
+			if(neighborhoodMap.hasOwnProperty(neighborhood)){
+				
+			}
+		}
 	}
 	
   </script>
