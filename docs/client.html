@@ -48,9 +48,9 @@
 		 <div>
 			<table>
 				<tr v-for= "crime in incidents" v-if = "neighborhoodMap[crime.neighborhood_number].isVisible">
-					<td>
-						{{crime[incident]}}
-					</td>
+					<td>{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
+					<td>{{crime.incident}}</td>
+
 				</tr>
 			</table>
 		 </div>
@@ -96,8 +96,9 @@
 				axios.get(crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31")
 				.then((response) => {
 					console.log("Retrieved Data");
-					this.incidents = response;
-					mapInit(this.incidents["data"], this.neighborhoodMap, currentBounds);
+					this.incidents = response.data;
+					console.log(this.incidents);
+					mapInit(this.incidents, this.neighborhoodMap, currentBounds);
 				})
 			}
 		})
