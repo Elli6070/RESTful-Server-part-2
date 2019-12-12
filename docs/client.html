@@ -45,37 +45,45 @@
 	
 	<div id="app">
 		<div id="mapid" style="width: 600px; height: 400px;"></div>
-		 <!--Insert grid here-->
+		 <div>
+			<table>
+				<tr v-for= "crime in incidents" v-if = "neighborhoodMap[crime.neighborhood_number].isVisible">
+					<td>
+						{{crime[incident]}}
+					</td>
+				</tr>
+			</table>
+		 </div>
 	</div>
 
   <script>
 	function Init(crime_api_url) {
 		console.log("getting crime data at: " + crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31");
-		let neighborhoodMap = {
-			1: {"neighborhood": "Conway", "crime_number": 0, "isVisible": true},
-			2: {"neighborhood": "Greater East Side", "crime_number": 0, "isVisible": true},
-			3: {"neighborhood": "West Side", "crime_number": 0, "isVisible": true},
-			4: {"neighborhood": "Dayton's Bluff", "crime_number": 0, "isVisible": true},
-			5: {"neighborhood": "Payne/Phalen", "crime_number": 0, "isVisible": true},
-			6: {"neighborhood": "North End", "crime_number": 0, "isVisible": true},
-			7: {"neighborhood": "Thomas/Dale(Frogtown)", "crime_number": 0, "isVisible": true},
-			8: {"neighborhood": "Summit/University", "crime_number": 0, "isVisible": true},
-			9: {"neighborhood": "West Seventh", "crime_number": 0, "isVisible": true},
-			10: {"neighborhood": "Como", "crime_number": 0, "isVisible": true},
-			11: {"neighborhood": "Hamline/Midway", "crime_number": 0, "isVisible": true},
-			12: {"neighborhood": "St. Anthony", "crime_number": 0, "isVisible": true},
-			13: {"neighborhood": "Union Park", "crime_number": 0, "isVisible": true},
-			14: {"neighborhood": "Macalaster-Groveland", "crime_number": 0, "isVisible": true},
-			15: {"neighborhood": "Highland", "crime_number": 0, "isVisible": true},
-			16: {"neighborhood": "Summit Hill", "crime_number": 0, "isVisible": true},
-			17: {"neighborhood": "Capitol River", "crime_number": 0, "isVisible": true}
-		};
 		let currentBounds = L.latLngBounds(L.latLng(44.989484, -93.209396), L.latLng(44.890331, -93.001686));
 		
 		var app = new Vue({
 			el: '#app',
 			data: {
 				incidents: null,
+				neighborhoodMap: {
+					1: {"neighborhood": "Conway", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.916959, -93.025327])},
+					2: {"neighborhood": "Greater East Side", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.928323, -93.025327])},
+					3: {"neighborhood": "West Side", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.930028, -93.080447])},
+					4: {"neighborhood": "Dayton's Bluff", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.956010, -93.058301])},
+					5: {"neighborhood": "Payne/Phalen", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.980341, -93.071940])},
+					6: {"neighborhood": "North End", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.976798, -93.111655])},
+					7: {"neighborhood": "Thomas/Dale(Frogtown)", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.963089, -93.147793])},
+					8: {"neighborhood": "Summit/University", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.948611, -93.126360])},
+					9: {"neighborhood": "West Seventh", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.932707, -93.119739])},
+					10: {"neighborhood": "Como", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.981661, -93.148235])},
+					11: {"neighborhood": "Hamline/Midway", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.961778, -93.167119])},
+					12: {"neighborhood": "St. Anthony", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.973546, -93.197621])},
+					13: {"neighborhood": "Union Park", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.949164, -93.174827])},
+					14: {"neighborhood": "Macalaster-Groveland", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.934240, -93.174333])},
+					15: {"neighborhood": "Highland", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.910549, -93.177474])},
+					16: {"neighborhood": "Summit Hill", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.939011, -93.138885])},
+					17: {"neighborhood": "Capitol River", "crime_number": 0, "isVisible": true, "coordinates": L.marker([44.947381, -93.091022])}
+				},
 			},
 			methods: {
 				humanizeURL: function (url) {
@@ -89,19 +97,19 @@
 				.then((response) => {
 					console.log("Retrieved Data");
 					this.incidents = response;
-					populateMap(this.incidents["data"]);
+					mapInit(this.incidents["data"], this.neighborhoodMap, currentBounds);
 				})
 			}
 		})
 	}
 
-	function populateMap(incidents) {
+	function mapInit(incidents, neighborhoodMap, currentBounds) {
 		console.log("Populating map");
-		console.log(currentBounds);
 		var mymap = L.map('mapid').setView([44.955723, -93.106056], 13);
 		var corner1 = L.latLng(44.989484, -93.209396);
 		var corner2 = L.latLng(44.890331, -93.001686);
 		var bounds = L.latLngBounds(corner1, corner2);
+		console.log(bounds);
 		
 		L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -112,7 +120,7 @@
 			maxZoom: 18,
 			maxBounds: bounds
 		}).addTo(mymap);
-		mymap.setMaxBounds(mymap.getBounds());
+		mymap.setMaxBounds(bounds);
 		
 		for (var key in incidents){
 			if(incidents.hasOwnProperty(key)){
@@ -120,63 +128,31 @@
 			}
 		}
 		
-		var Conway = L.marker([44.916959, -93.025327]).addTo(mymap);
-		Conway.bindPopup("<b># Crimes: " + neighborhoodMap[1] + "</b><br>.").openPopup();
+		for(neighborhood in neighborhoodMap){
+			if(neighborhoodMap.hasOwnProperty(neighborhood)){
+				var popup = neighborhoodMap[neighborhood].coordinates.addTo(mymap);
+				popup.bindPopup("<b>" + neighborhoodMap[neighborhood].neighborhood +"<b><br><b>" + neighborhoodMap[neighborhood].crime_number + " Crimes</b>.").openPopup();
+			}
+		}
 		
-		var GES = L.marker([44.928323, -93.025327]).addTo(mymap);
-		GES.bindPopup("<b># Crimes: " + neighborhoodMap[2] + "</b><br>.").openPopup();
+		currentBounds = mymap.getBounds();
+		setVisibleNeighborhoods(neighborhoodMap, currentBounds);
 		
-		var WestSide = L.marker([44.930028, -93.080447]).addTo(mymap);
-		WestSide.bindPopup("<b># Crimes: " + neighborhoodMap[3] + "</b><br>.").openPopup();
-		
-		var Dayton = L.marker([44.956010, -93.058301]).addTo(mymap);
-		Dayton.bindPopup("<b># Crimes: " + neighborhoodMap[4] + "</b><br>.").openPopup();
-		
-		var Payne = L.marker([44.980341, -93.071940]).addTo(mymap);
-		Payne.bindPopup("<b># Crimes: " + neighborhoodMap[5] + "</b><br>.").openPopup();
-		
-		var NorthEnd = L.marker([44.976798, -93.111655]).addTo(mymap);
-		NorthEnd.bindPopup("<b># Crimes: " + neighborhoodMap[6] + "</b><br>.").openPopup();
-		
-		var ThomasDale = L.marker([44.963089, -93.147793]).addTo(mymap);
-		ThomasDale.bindPopup("<b># Crimes: " + neighborhoodMap[7] + "</b><br>.").openPopup();
-		
-		var Summit = L.marker([44.948611, -93.126360]).addTo(mymap);
-		Summit.bindPopup("<b># Crimes: " + neighborhoodMap[8] + "</b><br>.").openPopup();
-		
-		var WestSeventh = L.marker([44.932707, -93.119739]).addTo(mymap);
-		WestSeventh.bindPopup("<b># Crimes: " + neighborhoodMap[9] + "</b><br>.").openPopup();
-		
-		var Como = L.marker([44.981661, -93.148235]).addTo(mymap);
-		Como.bindPopup("<b># Crimes: " + neighborhoodMap[10] + "</b><br>.").openPopup();
-		
-		var Hamline = L.marker([44.961778, -93.167119]).addTo(mymap);
-		Hamline.bindPopup("<b># Crimes: " + neighborhoodMap[11] + "</b><br>.").openPopup();
-		
-		var StAnthony = L.marker([44.973546, -93.197621]).addTo(mymap);
-		StAnthony.bindPopup("<b># Crimes: " + neighborhoodMap[12] + "</b><br>.").openPopup();
-		
-		var UnionPark = L.marker([44.949164, -93.174827]).addTo(mymap);
-		UnionPark.bindPopup("<b># Crimes: " + neighborhoodMap[13] + "</b><br>.").openPopup();
-		
-		var Macalaster = L.marker([44.934240, -93.174333]).addTo(mymap);
-		Macalaster.bindPopup("<b># Crimes: " + neighborhoodMap[14] + "</b><br>.").openPopup();
-		
-		var Highland = L.marker([44.910549, -93.177474]).addTo(mymap);
-		Highland.bindPopup("<b># Crimes: " + neighborhoodMap[15] + "</b><br>.").openPopup();
-		
-		var SummitHill = L.marker([44.939011, -93.138885]).addTo(mymap);
-		SummitHill.bindPopup("<b># Crimes: " + neighborhoodMap[16] + "</b><br>.").openPopup();
-		
-		var CapitolRiver = L.marker([44.947381, -93.091022]).addTo(mymap);
-		CapitolRiver.bindPopup("<b># Crimes: " + neighborhoodMap[17] + "</b><br>.").openPopup();
-		
-		var bounds = L.latLngBounds(L.latLng(mymap.getNorth(), mymap.getWest()), L.latLng(mymap.getSouth(), mymap.getEast()));
-		console.log(bounds);
+		mymap.on('moveend', function() {
+			currentBounds = mymap.getBounds();
+			setVisibleNeighborhoods(neighborhoodMap, mymap.getBounds());
+		});
 	}
 
-	function getVisibleNeighborhoods(){
-		
+	function setVisibleNeighborhoods(neighborhoodMap, currentBounds){
+		for(neighborhood in neighborhoodMap){
+			if(neighborhoodMap.hasOwnProperty(neighborhood)){
+				neighborhoodMap[neighborhood].isVisible = neighborhoodMap[neighborhood].coordinates.getLatLng().lat >= currentBounds.getSouth() &&
+					neighborhoodMap[neighborhood].coordinates.getLatLng().lat <= currentBounds.getNorth() &&
+					neighborhoodMap[neighborhood].coordinates.getLatLng().lng >= currentBounds.getWest() &&
+					neighborhoodMap[neighborhood].coordinates.getLatLng().lng <= currentBounds.getEast();
+			}
+		}
 	}
 	
   </script>
