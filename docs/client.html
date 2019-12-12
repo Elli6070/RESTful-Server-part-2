@@ -11,6 +11,7 @@
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="application/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="style.css">
 	
     <!-- Prompt JavaScript - this can be moved to a separate .js file if desired -->
     <script type="application/javascript">
@@ -44,14 +45,19 @@
     <!-- End: Prompt -->
 	
 	<div id="app">
-		<div id="mapid" style="width: 600px; height: 400px;"></div>
+		<div id="mapid" style="width: 800px; height: 600px;"></div>
 		 <div>
 			<table>
-				<tr v-for= "crime in incidents" v-if = "neighborhoodMap[crime.neighborhood_number].isVisible">
-					<td>{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
-					<td>{{crime.incident}}</td>
-
-				</tr>
+				<thead>
+					<th>Neighborhood</th>
+					<th>Crime</th>
+				</thead>
+				<tbody>
+					<tr v-for= "crime in incidents" v-if = "neighborhoodMap[crime.neighborhood_number].isVisible">
+						<td>{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
+						<td>{{crime.incident}}</td>
+					</tr>
+				</tbody>
 			</table>
 		 </div>
 	</div>
@@ -97,7 +103,6 @@
 				.then((response) => {
 					console.log("Retrieved Data");
 					this.incidents = response.data;
-					console.log(this.incidents);
 					mapInit(this.incidents, this.neighborhoodMap, currentBounds);
 				})
 			}
@@ -110,7 +115,6 @@
 		var corner1 = L.latLng(44.989484, -93.209396);
 		var corner2 = L.latLng(44.890331, -93.001686);
 		var bounds = L.latLngBounds(corner1, corner2);
-		console.log(bounds);
 		
 		L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
