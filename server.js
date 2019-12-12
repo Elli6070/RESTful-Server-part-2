@@ -7,7 +7,7 @@ var cors = require('cors');
 var xml = require('xml-js');
 var js2xmlparser = require("js2xmlparser");
 
-var port = 8000;
+var port = 8027;
 
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 var client_file = path.join(__dirname, "docs/client.html");

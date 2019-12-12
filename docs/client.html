@@ -1,58 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>St. Paul Crime</title>
-
 	<script src="https://unpkg.com/vue"></script>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
-
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="application/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	
+    <!-- Prompt JavaScript - this can be moved to a separate .js file if desired -->
+    <script type="application/javascript">
+        function Prompt() {
+            $("#dialog-form").dialog({
+                autoOpen: true,
+                modal: true,
+                width: "360px",
+                buttons: {
+                    "Ok": function() {
+                        var prompt_input = $("#prompt_input");
+                        Init(prompt_input.val());
+                        $(this).dialog("close");
+                    },
+                    "Cancel": function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        }
+    </script>
+    <!-- End: Prompt JavaScript -->
 </head>
-<body>
+<body onload="Prompt()">
 
-<div id="app">
-    <ul>
-      <li>
-	  </li>
-	  <li>
+	<!-- Prompt -->
+    <div id="dialog-form">
+        <label for="name">URL for St. Paul Crime API:</label>
+        <input type="text" id="prompt_input" class="text ui-widget-content ui-corner-all" style="width: 320px;"/>
+    </div>
+    <!-- End: Prompt -->
+	
+	<div id="app">
 		<div id="mapid" style="width: 600px; height: 400px;"></div>
-	  </li>
-	  <li>
 		 <!--Insert grid here-->
-	  </li>
-    </ul>
-  </div>
+	</div>
 
   <script>
-    var app = new Vue({
-      el: '#app',
-      
-	  data: {
-		incidents: null,
-      },
-      methods: {
-        humanizeURL: function (url) {
-          return url
-            .replace(/^https?:\/\//, '')
-            .replace(/\/$/, '')
-        }
-      },
-	  mounted (){
-		axios.get("http://cisc-dean.stthomas.edu:8027/incidents?start_date=2019-10-01&end_date=2019-10-31")
-		.then((response) => {
-			console.log("Retrieved Data");
-			this.incidents = response;
-			populateMap(this.incidents["data"]);
-		})
-	  }
-    })
-	let visibleNeighborhoods = {
-			1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true, 11: true, 12: true, 13: true, 14: true, 15: true, 16: true, 17: true
+	function Init(crime_api_url) {
+		console.log("getting crime data at: " + crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31");
+		let neighborhoodMap = {
+			1: {"neighborhood": "Conway", "crime_number": 0, "isVisible": true},
+			2: {"neighborhood": "Greater East Side", "crime_number": 0, "isVisible": true},
+			3: {"neighborhood": "West Side", "crime_number": 0, "isVisible": true},
+			4: {"neighborhood": "Dayton's Bluff", "crime_number": 0, "isVisible": true},
+			5: {"neighborhood": "Payne/Phalen", "crime_number": 0, "isVisible": true},
+			6: {"neighborhood": "North End", "crime_number": 0, "isVisible": true},
+			7: {"neighborhood": "Thomas/Dale(Frogtown)", "crime_number": 0, "isVisible": true},
+			8: {"neighborhood": "Summit/University", "crime_number": 0, "isVisible": true},
+			9: {"neighborhood": "West Seventh", "crime_number": 0, "isVisible": true},
+			10: {"neighborhood": "Como", "crime_number": 0, "isVisible": true},
+			11: {"neighborhood": "Hamline/Midway", "crime_number": 0, "isVisible": true},
+			12: {"neighborhood": "St. Anthony", "crime_number": 0, "isVisible": true},
+			13: {"neighborhood": "Union Park", "crime_number": 0, "isVisible": true},
+			14: {"neighborhood": "Macalaster-Groveland", "crime_number": 0, "isVisible": true},
+			15: {"neighborhood": "Highland", "crime_number": 0, "isVisible": true},
+			16: {"neighborhood": "Summit Hill", "crime_number": 0, "isVisible": true},
+			17: {"neighborhood": "Capitol River", "crime_number": 0, "isVisible": true}
 		};
+		let currentBounds = L.latLngBounds(L.latLng(44.989484, -93.209396), L.latLng(44.890331, -93.001686));
 		
-	let currentBounds = L.latLngBounds(L.latLng(44.989484, -93.209396), L.latLng(44.890331, -93.001686));
-	//L.latLngBounds(L.latLng(mymap.getNorth(), mymap.getWest()), L.latLng(mymap.getSouth(), mymap.getEast()));
+		var app = new Vue({
+			el: '#app',
+			data: {
+				incidents: null,
+			},
+			methods: {
+				humanizeURL: function (url) {
+				  return url
+					.replace(/^https?:\/\//, '')
+					.replace(/\/$/, '')
+				}
+			},
+			mounted (){
+				axios.get(crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31")
+				.then((response) => {
+					console.log("Retrieved Data");
+					this.incidents = response;
+					populateMap(this.incidents["data"]);
+				})
+			}
+		})
+	}
+
 	function populateMap(incidents) {
 		console.log("Populating map");
 		console.log(currentBounds);
@@ -71,14 +113,10 @@
 			maxBounds: bounds
 		}).addTo(mymap);
 		mymap.setMaxBounds(mymap.getBounds());
-
-		var neighborhoodMap = {
-			1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0
-		};
 		
 		for (var key in incidents){
 			if(incidents.hasOwnProperty(key)){
-				neighborhoodMap[incidents[key].neighborhood_number]++;
+				neighborhoodMap[incidents[key].neighborhood_number]["crime_number"]++;
 			}
 		}
 		
@@ -132,11 +170,15 @@
 		
 		var CapitolRiver = L.marker([44.947381, -93.091022]).addTo(mymap);
 		CapitolRiver.bindPopup("<b># Crimes: " + neighborhoodMap[17] + "</b><br>.").openPopup();
+		
+		var bounds = L.latLngBounds(L.latLng(mymap.getNorth(), mymap.getWest()), L.latLng(mymap.getSouth(), mymap.getEast()));
+		console.log(bounds);
 	}
-	
+
 	function getVisibleNeighborhoods(){
 		
 	}
+	
   </script>
 
 </body>
