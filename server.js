@@ -7,8 +7,9 @@ var cors = require('cors');
 var xml = require('xml-js');
 var js2xmlparser = require("js2xmlparser");
 var URL = require("url").URL;
+const args = process.argv.slice(2)
 
-var port = 8027;
+var port = args[0];
 
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 var client_file = path.join(__dirname, "docs/client.html");
@@ -143,6 +144,7 @@ app.get('/incidents', (req, res) => {
 	let start_date = params.get("start_date");
 	let end_date = params.get("end_date");
 	let code = params.get("code");
+	let incidentType = params.get("incident_type");
 	let grid = params.get("grid");
 	let id = params.get("id");
 	let limit = params.get("limit");
@@ -172,6 +174,13 @@ app.get('/incidents', (req, res) => {
 	if(code != null)
 	{
 		query = query + whereOrAnd + " Incidents.code IN (" + code + ")";
+		if(whereOrAnd == "WHERE"){
+			whereOrAnd = " AND";
+		}
+	}
+	if(incidentType != null)
+	{
+		query = query + whereOrAnd + " Incidents.incident IN ('" + incidentType + "')";
 		if(whereOrAnd == "WHERE"){
 			whereOrAnd = " AND";
 		}

@@ -15,6 +15,7 @@
 	
     <!-- Prompt JavaScript - this can be moved to a separate .js file if desired -->
     <script type="application/javascript">
+	let Api_URL = "";
         function Prompt() {
             $("#dialog-form").dialog({
                 autoOpen: true,
@@ -23,7 +24,8 @@
                 buttons: {
                     "Ok": function() {
                         var prompt_input = $("#prompt_input");
-                        Init(prompt_input.val());
+						Api_URL = prompt_input.val(); 
+                        Init(prompt_input.val(), "/incidents?start_date=2019-10-01&end_date=2019-10-31");
                         $(this).dialog("close");
                     },
                     "Cancel": function() {
@@ -58,6 +60,59 @@
 			</form>
 		</div>
 		<div id="mapid" style="width: 800px; height: 600px;"></div>
+		<div>
+			<form>
+				Filter Table:
+				<select id="selectIncidentType">
+					<option value="Proactive%20Police%20Visit"> Proactive Police Visit </option>
+					<option value="Vandalism"> Vandalism </option>
+					<option value="Discharge"> Discharge </option>
+					<option value="Auto%20Theft"> Auto Theft </option>
+					<option value="Theft"> Theft </option>
+					<option value="Simple%20Asasult%20Dom."> Simple Asasult Dom. </option>
+					<option value="Narcotics"> Narcotics </option>
+					<option value="Burglary"> Burglary </option>
+					<option value="Agg.%20Assault"> Agg. Assault </option>
+					<option value="Robbery"> Robbery </option>
+					<option value="Agg.%20Assault%20Dom."> Agg. Assault Dom. </option>
+					<option value="Rape"> Rape </option>
+					<option value="Graffiti"> Graffiti </option>
+					<option value="Arson"> Arson </option>
+					<option value="Community%20Engagement%20Event"> Community Engagement Event </option>
+					<option value="Homicide"> Homicide </option>
+					<option value="Simple%20Assault%20Dom."> Simple Assault Dom. </option>
+					<option value="Other"> Other </option>
+				</select>
+				
+				<select id="selectNeighborhoodName">
+					<option value="1"> Conway </option>
+					<option value="2"> Greater East Side </option>
+					<option value="3"> West Side </option>
+					<option value="4"> Dayton's Bluff </option>
+					<option value="5"> Payne/Phalen </option>
+					<option value="6"> North End </option>
+					<option value="7"> Thomas/Dale(Frogtown) </option>
+					<option value="8"> Summit/University </option>
+					<option value="9"> West Seventh </option>
+					<option value="10"> Como </option>
+					<option value="11"> Hamline/Midway </option>
+					<option value="12"> St. Anthony </option>
+					<option value="13"> Union Park </option>
+					<option value="14"> Macalester-Groveland </option>
+					<option value="15"> Highland </option>
+					<option value="16"> Summit Hill </option>
+					<option value="17"> Capitol River </option>
+				</select>
+				
+				<input type="date" id="start_date" name="start_date"
+					value="2019-10-01">
+					
+				<input type="date" id="end_date" name="end_date"
+					value="2019-10-31">
+					
+				<button id="filterTable"> Apply Filter</button>
+			</form>
+		</div>
 		 <div>
 			<table style = "border: 1px">
 				 <thead>
@@ -97,8 +152,8 @@
 	</div>
 
   <script>
-	function Init(crime_api_url) {
-		console.log("getting crime data at: " + crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31");
+	function Init(crime_api_url, query) {
+		console.log("getting crime data at: " + crime_api_url + query);
 		let currentBounds = L.latLngBounds(L.latLng(44.989484, -93.209396), L.latLng(44.890331, -93.001686));
 		
 		var app = new Vue({
@@ -142,6 +197,12 @@
 					{
 						return {'background-color' : '#EDF661'};
 					}
+					
+					else if(incidentCode.charAt(0) == 1 && incidentCode.charAt(1)==4)
+					{
+						return {'background-color' : '#EDF661'};
+					}
+					
 					else if(incidentCode.charAt(0) == 2 || incidentCode.charAt(0) == 4 || incidentCode.charAt(0) == 8)
 					{
 						return {'background-color' : '#BA3D3D'};
@@ -153,7 +214,7 @@
 					}
 					else if (incidentCode.charAt(0) == 1 && (incidentCode.charAt(1) == 3) || incidentCode.charAt(1) == 8)
 					{
-						return {'background-color' : '#EDF661'};
+						return {'background-color' : '7FFA57'};
 					}
 					else if (incidentCode.charAt(0) == 9 && incidentCode.length == 3)
 					{
@@ -163,11 +224,13 @@
 				}
 			},
 			mounted (){
-				axios.get(crime_api_url + "/incidents?start_date=2019-10-01&end_date=2019-10-31")
+			console.log(crime_api_url + query);
+				axios.get(crime_api_url + query)
 				.then((response) => {
 					console.log("Retrieved Data");
 					var dataPromise = new Promise((resolve, reject) => { 
 						setTimeout(() => {this.incidents = response.data
+							console.log(this.incidents);
 							resolve("data Loaded");
 						}, 300)
 					});
@@ -229,7 +292,6 @@
 					document.getElementById("searchText").value = address;
 				});
 			}
-			//addRowHandlers(mymap);
 			setVisibleNeighborhoods(neighborhoodMap, mymap.getBounds());
 		});
 		
@@ -265,6 +327,21 @@
 				}
 			}
 		});
+		
+		L.DomEvent.addListener(L.DomUtil.get('filterTable'), 'click', function () {
+			var query = "/incidents?start_date="
+						+document.getElementById("start_date").value+"&end_date="
+						+document.getElementById("end_date").value+"&incident_type="
+						+document.getElementById("selectIncidentType").value+"&id="+
+						document.getElementById("selectNeighborhoodName").value;
+						console.log(query);
+			for(neighborhood in neighborhoodMap){
+				neighborhood.isVisible = true;
+			}
+			mymap.remove();
+			Init(Api_URL, query);
+		
+		});
 		addRowHandlers(mymap);
 	}
 
@@ -285,11 +362,9 @@
 		var i;
 		for(i = 0; i < rows.length; i++){
 			var row = rows[i];
-			console.log(row);
 			L.DomEvent.addListener(row, 'click', function () {
 				console.log("table event triggered");
 				var address = row.getElementsByTagName("td")[2].innerText;
-				console.log(address);
 				console.log("https://nominatim.openstreetmap.org/search?q=" + address + ",%20St.%20Paul,%20Minnesota&format=json&limit=1");
 				axios.get("https://nominatim.openstreetmap.org/search?q=" + address + ",%20St.%20Paul,%20Minnesota&format=json&limit=1")
 					.then((response) => {
