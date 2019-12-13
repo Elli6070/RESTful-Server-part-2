@@ -11,7 +11,7 @@
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="application/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-	<link rel="stylesheet" href="style.css">
+	<!--<link rel="stylesheet" href="style.css">-->
 	
     <!-- Prompt JavaScript - this can be moved to a separate .js file if desired -->
     <script type="application/javascript">
@@ -59,6 +59,27 @@
 		</div>
 		<div id="mapid" style="width: 800px; height: 600px;"></div>
 		 <div>
+			<table style = "border: 1px">
+				 <thead>
+					 <th>Color</th>
+					 <th>Meaning</th>
+				 </thead>
+				 <tbody>
+					 <tr>
+						 <td style = "background-color: #BA3D3D"> Red </td>
+						 <td style = "background-color: #BA3D3D"> Violent Crime </td>
+					 </tr>
+					 <tr>
+						 <td style = "background-color: #EDF661"> Yellow </td>
+						 <td style = "background-color: #EDF661"> Property Crime </td>
+					 </tr>
+
+					 <tr>
+						 <td style = "background-color: #7FFA57"> Green </td>
+						 <td style = "background-color: #7FFA57"> Other Crime </td>
+					 </tr>
+				 </tbody>
+			</table>
 			<table>
 				<thead>
 					<th>Neighborhood</th>
@@ -66,8 +87,8 @@
 				</thead>
 				<tbody>
 					<tr v-for= "crime in incidents" v-if = "neighborhoodMap[crime.neighborhood_number].isVisible">
-						<td align = "center">{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
-						<td align = "center">{{crime.incident}}</td>
+						<td>{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
+						<td v-bind:style="getColorY(crime.code)">{{crime.incident}}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -108,6 +129,39 @@
 				  return url
 					.replace(/^https?:\/\//, '')
 					.replace(/\/$/, '')
+				},
+				getColorY: function(incidentCod) {
+					var result = false;
+					var incidentCode = incidentCod.toString();
+					console.log(incidentCod);
+					if (incidentCode.charAt(0) == 1 && (incidentCode.charAt(1) == 1 || incidentCode.charAt(1) == 2))
+					{
+						console.log("in red");
+						return {'background-color' : '#BA3D3D'};
+					}
+					else if (incidentCode.charAt(0) == 1 && incidentCode.charAt(1) == 3)
+					{
+						return {'background-color' : '#EDF661'};
+					}
+					else if(incidentCode.charAt(0) == 2 || incidentCode.charAt(0) == 4 || incidentCode.charAt(0) == 8)
+					{
+						console.log("in yello")
+						return {'background-color' : '#BA3D3D'};
+					}
+					else if((incidentCode.charAt(0) == 3 || incidentCode.charAt(0) == 5 || incidentCode.charAt(0) == 6
+					|| incidentCode.charAt(0) == 7 || incidentCode.charAt(0) == 9) && incidentCode.length == 3)
+					{
+						return {'background-color' : '#EDF661'};
+					}
+					else if (incidentCode.charAt(0) == 1 && (incidentCode.charAt(1) == 3) || incidentCode.charAt(1) == 8)
+					{
+						return {'background-color' : '#EDF661'};
+					}
+					else if (incidentCode.charAt(0) == 9 && incidentCode.length == 3)
+					{
+						return {'background-color' : '#EDF661'};
+					}
+					else { return {'background-color' : '#7FFA57'}};
 				}
 			},
 			mounted (){
@@ -160,13 +214,17 @@
 		mymap.on('moveend', function() {
 			currentBounds = mymap.getBounds();
 			if(document.getElementById("searchType").value == "coord"){
-				document.getElementById("searchText").placeholder = mymap.getCenter().lat + "/" + mymap.getCenter().lng;
+				var latlng = mymap.getCenter().lat + "/" + mymap.getCenter().lng;
+				document.getElementById("searchText").placeholder = latlng;
+				document.getElementById("searchText").value = latlng;
 			}
 			else{
 				axios.get("https://nominatim.openstreetmap.org/reverse?lat=" + mymap.getCenter().lat +"&lon=" + mymap.getCenter().lng + "&format=json")
 				.then((response) => {
 				console.log(response.data);
-					document.getElementById("searchText").placeholder = response.data.display_name.substring(0, response.data.display_name.indexOf(", Minnesota"));
+					var address = response.data.display_name.substring(0, response.data.display_name.indexOf(", Minnesota"));
+					document.getElementById("searchText").placeholder = address;
+					document.getElementById("searchText").value = address;
 				});
 			}
 			
