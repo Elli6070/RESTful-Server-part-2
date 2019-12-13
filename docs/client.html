@@ -45,6 +45,18 @@
     <!-- End: Prompt -->
 	
 	<div id="app">
+		<div>
+			<form>
+				Search:
+				<select id="searchType"> 
+					<option value="coord" selected> lat/lng </option>
+					<option value="address"> address </option>
+					<option value="neighborhood"> neighorhood name </option>
+				</select>
+				<input id="searchText" type="text" placeholder= "" style= "width: 400px;"> </input>
+				<button id="mapSearch" type= "button" onclick="executeMapSearch()"> GO </button>
+			</form>
+		</div>
 		<div id="mapid" style="width: 800px; height: 600px;"></div>
 		 <div>
 			<table>
@@ -54,8 +66,8 @@
 				</thead>
 				<tbody>
 					<tr v-for= "crime in incidents" v-if = "neighborhoodMap[crime.neighborhood_number].isVisible">
-						<td>{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
-						<td>{{crime.incident}}</td>
+						<td align = "center">{{neighborhoodMap[crime.neighborhood_number].neighborhood}}</td>
+						<td align = "center">{{crime.incident}}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -127,6 +139,8 @@
 		}).addTo(mymap);
 		mymap.setMaxBounds(bounds);
 		
+		document.getElementById("searchText").placeholder = mymap.getCenter();
+		
 		for (var key in incidents){
 			if(incidents.hasOwnProperty(key)){
 				neighborhoodMap[incidents[key].neighborhood_number]["crime_number"]++;
@@ -145,6 +159,7 @@
 		
 		mymap.on('moveend', function() {
 			currentBounds = mymap.getBounds();
+			document.getElementById("searchText").placeholder = mymap.getCenter().lat + "/" + mymap.getCenter().lng;
 			setVisibleNeighborhoods(neighborhoodMap, mymap.getBounds());
 		});
 	}
@@ -157,6 +172,24 @@
 					neighborhoodMap[neighborhood].coordinates.getLatLng().lng >= currentBounds.getWest() &&
 					neighborhoodMap[neighborhood].coordinates.getLatLng().lng <= currentBounds.getEast();
 			}
+		}
+	}
+	
+	function executeMapSearch(){
+	console.log("executing search");
+		if(document.getElementById("searchType").value == "coord"){
+			var searchText = document.getElementById("searchText").value;
+			var lat = searchText.substring(0, searchText.indexOf("/"));
+			var lng = searchText.substring(searchText.indexOf("/") + 1);
+			document.getElementById("mapid").panTo(L.latLng(lat, lng));
+		}
+		
+		if(document.getElementById("searchType").value == "address"){
+			
+		}
+		
+		if(document.getElementById("searchType").value == "neighborhood"){
+			
 		}
 	}
 	
