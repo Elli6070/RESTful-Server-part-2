@@ -53,8 +53,8 @@
 					<option value="address"> address </option>
 					<option value="neighborhood"> neighorhood name </option>
 				</select>
-				<input id="searchText" type="text" placeholder= "" style= "width: 400px;"> </input>
-				<button id="mapSearch" type= "button" onclick="executeMapSearch()"> GO </button>
+				<input id="searchText" type="text" placeholder= "" style= "width: 550px;"> </input>
+				<button id="mapSearch" type= "button"> GO </button>
 			</form>
 		</div>
 		<div id="mapid" style="width: 800px; height: 600px;"></div>
@@ -124,8 +124,8 @@
 	function mapInit(incidents, neighborhoodMap, currentBounds) {
 		console.log("Populating map");
 		var mymap = L.map('mapid').setView([44.955723, -93.106056], 13);
-		var corner1 = L.latLng(44.989484, -93.209396);
-		var corner2 = L.latLng(44.890331, -93.001686);
+		var corner1 = L.latLng(45, -93.27);
+		var corner2 = L.latLng(44.82, -93);
 		var bounds = L.latLngBounds(corner1, corner2);
 		
 		L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -159,8 +159,52 @@
 		
 		mymap.on('moveend', function() {
 			currentBounds = mymap.getBounds();
-			document.getElementById("searchText").placeholder = mymap.getCenter().lat + "/" + mymap.getCenter().lng;
+			if(document.getElementById("searchType").value == "coord"){
+				document.getElementById("searchText").placeholder = mymap.getCenter().lat + "/" + mymap.getCenter().lng;
+			}
+			else{
+				axios.get("https://nominatim.openstreetmap.org/reverse?lat=" + mymap.getCenter().lat +"&lon=" + mymap.getCenter().lng + "&format=json")
+				.then((response) => {
+				console.log(response.data);
+					document.getElementById("searchText").placeholder = response.data.display_name.substring(0, response.data.display_name.indexOf(", Minnesota"));
+				});
+			}
+			
 			setVisibleNeighborhoods(neighborhoodMap, mymap.getBounds());
+		});
+		
+		L.DomEvent.addListener(L.DomUtil.get('mapSearch'), 'click', function () {
+			
+			if(document.getElementById("searchType").value == "coord"){
+				console.log("lat/lng search");
+				var searchText = document.getElementById("searchText").value;
+				var lat = searchText.substring(0, searchText.indexOf("/"));
+				var lng = searchText.substring(searchText.indexOf("/") + 1);
+				mymap.flyTo(L.latLng(lat, lng));
+			}
+			
+			if(document.getElementById("searchType").value == "address"){
+				axios.get("https://nominatim.openstreetmap.org/search?q=" + document.getElementById("searchText").value + "&format=json&limit=1")
+				.then((response) => {
+					console.log("Nominatim address search");
+					mymap.flyTo(L.latLng(response.data[0].lat, response.data[0].lon));
+				});
+			}
+			
+			if(document.getElementById("searchType").value == "neighborhood"){
+				console.log("Nighborhood name search");
+				let neighborhoodIndex = null;
+				for(neighborhood in neighborhoodMap){
+					if(neighborhoodMap[neighborhood].neighborhood == document.getElementById("searchText").value){
+						neighborhoodIndex = neighborhood;
+					}
+				}
+				
+				if(neighborhoodIndex != null){
+				console.log(neighborhoodIndex);
+					mymap.flyTo(neighborhoodMap[neighborhoodIndex].coordinates.getLatLng());
+				}
+			}
 		});
 	}
 
@@ -172,24 +216,6 @@
 					neighborhoodMap[neighborhood].coordinates.getLatLng().lng >= currentBounds.getWest() &&
 					neighborhoodMap[neighborhood].coordinates.getLatLng().lng <= currentBounds.getEast();
 			}
-		}
-	}
-	
-	function executeMapSearch(){
-	console.log("executing search");
-		if(document.getElementById("searchType").value == "coord"){
-			var searchText = document.getElementById("searchText").value;
-			var lat = searchText.substring(0, searchText.indexOf("/"));
-			var lng = searchText.substring(searchText.indexOf("/") + 1);
-			document.getElementById("mapid").panTo(L.latLng(lat, lng));
-		}
-		
-		if(document.getElementById("searchType").value == "address"){
-			
-		}
-		
-		if(document.getElementById("searchType").value == "neighborhood"){
-			
 		}
 	}
 	
