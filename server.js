@@ -6,7 +6,6 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var xml = require('xml-js');
 var js2xmlparser = require("js2xmlparser");
-var URL = require("url").URL;
 
 var port = 8027;
 
@@ -138,95 +137,235 @@ app.get('/neighborhoods', (req, res) => {
 
 app.get('/incidents', (req, res) => {
     let incidents = {};
-	let url = new URL("http://localhost:"+port+req.url);
-	let params = new URLSearchParams(url.search.substring(1));
-	let start_date = params.get("start_date");
-	let end_date = params.get("end_date");
-	let code = params.get("code");
-	let grid = params.get("grid");
-	let id = params.get("id");
-	let limit = params.get("limit");
-	let format = params.get("format");
-	let whereOrAnd = "WHERE";
-	console.log(start_date);
-	console.log(end_date);
-	console.log(code);
-
-	let query = `SELECT *
+	if(req.url.includes('/incidents?start_date='))
+	{
+		var start_date = req.url.substring(req.url.indexOf('?start_date=') + 12);
+		db.all(`SELECT *
 				FROM Incidents
-				`;
-	if(start_date != null)
-	{
-		query = query + whereOrAnd + " Incidents.date_time >= '" + start_date  + "T00.00.00.000'";
-		if(whereOrAnd == "WHERE"){
-			whereOrAnd = " AND";
-		}
+				WHERE Incidents.date_time >= ?
+				ORDER BY Incidents.date_time ASC`,[start_date], (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					res.type('json').send(incidents);
+				});
 	}
-	if(end_date != null)
-	{
-		query = query + whereOrAnd + " Incidents.date_time <= '" + end_date + "T24.00.00.000'";
-		if(whereOrAnd == "WHERE"){
-			whereOrAnd = " AND";
-		}
-	}
-	if(code != null)
-	{
-		query = query + whereOrAnd + " Incidents.code IN (" + code + ")";
-		if(whereOrAnd == "WHERE"){
-			whereOrAnd = " AND";
-		}
-	}
-	if(grid != null)
-	{
-		query = query + whereOrAnd + " Incidents.police_grid IN (" + grid + ")";
-		if(whereOrAnd == "WHERE"){
-			whereOrAnd = " AND";
-		}
-	}
-	if(id != null)
-	{
-		query = query + whereOrAnd + " Incidents.neighborhood_number IN (" + id + ")";
-		if(whereOrAnd == "WHERE"){
-			whereOrAnd =  " AND";
-		}
-	}
-	query = query + " ORDER BY Incidents.date_time DESC";
 	
-	if(limit != null)
+	else if(req.url.includes('/incidents?end_date='))
 	{
-		query = query + " LIMIT " + limit;
+		var end_date = req.url.substring(req.url.indexOf('?end_date=') + 10);
+		db.all(`SELECT *
+				FROM Incidents
+				WHERE Incidents.date_time <= ?
+				ORDER BY Incidents.date_time ASC`,[end_date], (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					res.type('json').send(incidents);
+				});
 	}
-	console.log(query);
 	
-	db.all(query, (err, rows) => {
-		for (var i = 0; i < rows.length; i++)
-		{
-			var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
-			var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
-			var code = rows[i].code;
-			var incident = rows[i].incident;
-			var police_grid = rows[i].police_grid;
-			var neighborhood_number = rows[i].neighborhood_number;
-			var block = rows[i].block;
-			incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
-			"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
-			"block" : block};
-		}
+	else if(req.url.includes('/incidents?code='))
+	{
+		var codes = req.url.substring(req.url.indexOf('?code=') + 6);
+		var query = `SELECT *
+				FROM Incidents
+				WHERE Incidents.code IN (` + codes + `)
+				ORDER BY Incidents.date_time DESC
+				LIMIT 10000`;
+
+		db.all(query, (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					res.type('json').send(incidents);
+				});
 		
-		if(format != null && format == 'xml')
-		{
-			xmlQuery = `<textarea style="border:none; width:100%; height:100%">` + 
-			xml.json2xml(incidents, {compact: true, spaces: 4}) + `
-			</textarea>`;
-			res.writeHead(200, { 'Content-Type': 'text/html' });
-			res.write(xmlQuery);
-		}
-		else
-		{
+	}
+	
+	else if(req.url.includes('/incidents?grid='))
+	{
+		var grids = req.url.substring(req.url.indexOf('?grid=') + 6);
+		var query = `SELECT *
+				FROM Incidents
+				WHERE Incidents.police_grid IN (` + grids + `)
+				ORDER BY Incidents.date_time DESC
+				LIMIT 10000`;
+
+		db.all(query, (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					res.type('json').send(incidents);
+				});
+		
+	}
+	
+	else if(req.url.includes('/incidents?id='))
+	{
+		var neighborhoods = req.url.substring(req.url.indexOf('?id=') + 4);
+		var query = `SELECT *
+				FROM Incidents
+				WHERE Incidents.neighborhood_number IN (` + neighborhoods + `)
+				ORDER BY Incidents.date_time DESC
+				LIMIT 10000`;
+
+		db.all(query, (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					res.type('json').send(incidents);
+				});
+		
+	}
+	
+	else if(req.url.includes('/incidents?limit='))
+	{
+		var limit = req.url.substring(req.url.indexOf('?limit=') + 7);
+		if(limit.length == 0) limit = "10000";
+		var query = `SELECT *
+				FROM Incidents
+				ORDER BY Incidents.date_time DESC
+				LIMIT ` + limit;
+
+		db.all(query, (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					res.type('json').send(incidents);
+				});
+		
+	}
+	
+	else if(req.url.includes('/incidents?format='))
+	{
+		let format = req.url.substring(req.url.indexOf('?format=') + 8);
+		var query = `SELECT *
+				FROM Incidents
+				ORDER BY Incidents.date_time DESC
+				LIMIT 10000`;
+
+		db.all(query, (err, rows) => {
+					for (var i = 0; i < rows.length; i++)
+					{
+						var date = rows[i].date_time.substring(0, rows[i].date_time.indexOf('T'));
+						var time = rows[i].date_time.substring(rows[i].date_time.indexOf('T'));
+						var code = rows[i].code;
+						var incident = rows[i].incident;
+						var police_grid = rows[i].police_grid;
+						var neighborhood_number = rows[i].neighborhood_number;
+						var block = rows[i].block;
+						incidents["I" + rows[i].case_number] = {"date" : date, "time" : time, "code" : code, 
+						"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+						"block" : block};
+					}
+					if(format == 'xml')
+					{
+						xmlQuery = `<textarea style="border:none; width:100%; height:100%">` + 
+						xml.json2xml(incidents, {compact: true, spaces: 4}) + `
+						</textarea>`;
+						res.writeHead(200, { 'Content-Type': 'text/html' });
+						res.write(xmlQuery);
+					}
+					else
+					{
+						res.type('json').send(incidents);
+					}
+					
+				});
+		
+	}
+	
+    else{
+		db.all(`SELECT Incidents.case_number AS number, 
+		Incidents.date_time AS date,
+		Incidents.code AS code,
+		Incidents.incident AS incident, 
+		Incidents.police_grid AS grid,
+		Incidents.neighborhood_number AS neighborhood,
+		Incidents.block AS block
+		FROM Incidents
+		LIMIT 10000`, (err,rows) =>{
+		   
+			for (var i = 0; i < rows.length; i++)
+			{
+				
+				var date = rows[i].date.substring(0, rows[i].date.indexOf('T'));
+				var time = rows[i].date.substring(rows[i].date.indexOf('T'));
+				var code = rows[i].code;
+				var incident = rows[i].incident;
+				var police_grid = rows[i].grid;
+				var neighborhood_number = rows[i].neighborhood;
+				var block = rows[i].block;
+				incidents["I" + rows[i].number] = {"date" : date, "time" : time, "code" : code, 
+				"incident" : incident, "police_grid" : police_grid, "neighborhood_number" : neighborhood_number,
+				"block" : block};
+			}
+			 
 			res.type('json').send(incidents);
-		}
-		
-	});
+
+		});
+	}
 });
 
 app.put('/new-incident', (req, res) => {
@@ -270,6 +409,7 @@ app.put('/new-incident', (req, res) => {
     
 
 });
+
 
 console.log('Now listening on port ' + port);
 app.listen(port);
