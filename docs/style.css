@@ -1,6 +1,64 @@
+button{
+    box-shadow:inset 0px 1px 0px 0px #bee2f9;
+	background:linear-gradient(to bottom, #63b8ee 5%, #468ccf 100%);
+	background-color:#63b8ee;
+	border-radius:6px;
+	border:1px solid #3866a3;
+	display:inline-block;
+	cursor:pointer;
+	color:#14396a;
+	font-family:Times New Roman;
+	font-size:17px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #7cacde;
+}
+
+
+input{
+
+    padding: 8px;
+    font-size: 16px;
+    border-width: 1px;
+    border-color: #7c97ec;
+    background-color: #FFFFFF;
+    color: #000000;
+    border-style: solid;
+    border-radius: 0px;
+    box-shadow: 0px 0px 5px rgba(128,194,231,.75);
+    text-shadow: 0px 0px 5px rgba(66,66,66,.75);
+}
+select{
+    padding: 8px;
+    font-size: 16px;
+    border-width: 1px;
+    border-color: #7c97ec;
+    background-color: #FFFFFF;
+    color: #000000;
+    border-style: solid;
+    border-radius: 0px;
+    box-shadow: 0px 0px 5px rgba(128,194,231,.75);
+    text-shadow: 0px 0px 5px rgba(66,66,66,.75);
+}
+button:hover{
+    background:linear-gradient(to bottom, #468ccf 5%, #63b8ee 100%);
+	background-color:#468ccf;
+}
+
+
+button:active {
+	position:relative;
+	top:1px;
+}
+
 table {
   border: 1px solid black;
   font: "Comic sans MS"; 
+  overflow-y:scroll;
+  height: 100px;
+  display:block;
+  float: left;
 
 }
 
@@ -16,6 +74,22 @@ td {
 }
 
 thead{
-    background-color: bisque;
+    background: linear-gradient(to bottom, #468ccf 5%, #63b8ee 100%);
+}
+
+h1{
+    font: verdana;
+    color: #468ccf;
+}
+
+h2{
+    font: verdana;
+    color: #468ccf;
+
+}
+a{
+    font: verdana;
+    color: #468ccf;
+    font-size:24px;
 }
 

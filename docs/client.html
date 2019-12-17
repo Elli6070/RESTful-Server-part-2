@@ -4,6 +4,7 @@
 	<meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>St. Paul Crime</title>
+	<link rel="stylesheet" href="./style.css">
 	<script src="https://unpkg.com/vue"></script>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
@@ -11,7 +12,7 @@
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="application/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-	<!--<link rel="stylesheet" href="style.css">-->
+	
 	
     <!-- Prompt JavaScript - this can be moved to a separate .js file if desired -->
     <script type="application/javascript">
@@ -40,6 +41,7 @@
 <body onload="Prompt()">
 
 	<!-- Prompt -->
+	<h1>St. Paul Crime</h1>
     <div id="dialog-form">
         <label for="name">URL for St. Paul Crime API:</label>
         <input type="text" id="prompt_input" class="text ui-widget-content ui-corner-all" style="width: 320px;"/>
@@ -49,7 +51,7 @@
 	<div id="app">
 		<div>
 			<form>
-				Search:
+				
 				<select id="searchType"> 
 					<option value="coord" selected> lat/lng </option>
 					<option value="address"> address </option>
@@ -62,7 +64,7 @@
 		<div id="mapid" style="width: 800px; height: 600px;"></div>
 		<div>
 			<form>
-				Filter Table:
+				
 				<select id="selectIncidentType">
 					<option value="Proactive%20Police%20Visit"> Proactive Police Visit </option>
 					<option value="Vandalism"> Vandalism </option>
@@ -121,17 +123,17 @@
 				 </thead>
 				 <tbody>
 					 <tr>
-						 <td style = "background-color: #BA3D3D"> Red </td>
-						 <td style = "background-color: #BA3D3D"> Violent Crime </td>
+						 <td style = "background-color: #faa0aa"> Red </td>
+						 <td style = "background-color: #faa0aa"> Violent Crime </td>
 					 </tr>
 					 <tr>
-						 <td style = "background-color: #EDF661"> Yellow </td>
-						 <td style = "background-color: #EDF661"> Property Crime </td>
+						 <td style = "background-color: #fcf2a7"> Yellow </td>
+						 <td style = "background-color: #fcf2a7"> Property Crime </td>
 					 </tr>
 
 					 <tr>
-						 <td style = "background-color: #7FFA57"> Green </td>
-						 <td style = "background-color: #7FFA57"> Other Crime </td>
+						 <td style = "background-color: #78f599"> Green </td>
+						 <td style = "background-color: #78f599"> Other Crime </td>
 					 </tr>
 				 </tbody>
 			</table>
@@ -148,7 +150,10 @@
 					</tr>
 				</tbody>
 			</table>
+
+			
 		 </div>
+		 <a href="/about.html">About</a>
 	</div>
 
   <script>
@@ -191,36 +196,36 @@
 					var incidentCode = incidentCod.toString();
 					if (incidentCode.charAt(0) == 1 && (incidentCode.charAt(1) == 1 || incidentCode.charAt(1) == 2))
 					{
-						return {'background-color' : '#BA3D3D'};
+						return {'background-color' : '#faa0aa'};
 					}
 					else if (incidentCode.charAt(0) == 1 && incidentCode.charAt(1) == 3)
 					{
-						return {'background-color' : '#EDF661'};
+						return {'background-color' : '#fcf2a7'};
 					}
 					
 					else if(incidentCode.charAt(0) == 1 && incidentCode.charAt(1)==4)
 					{
-						return {'background-color' : '#EDF661'};
+						return {'background-color' : '#fcf2a7'};
 					}
 					
 					else if(incidentCode.charAt(0) == 2 || incidentCode.charAt(0) == 4 || incidentCode.charAt(0) == 8)
 					{
-						return {'background-color' : '#BA3D3D'};
+						return {'background-color' : '#faa0aa'};
 					}
 					else if((incidentCode.charAt(0) == 3 || incidentCode.charAt(0) == 5 || incidentCode.charAt(0) == 6
 					|| incidentCode.charAt(0) == 7 || incidentCode.charAt(0) == 9) && incidentCode.length == 3)
 					{
-						return {'background-color' : '#EDF661'};
+						return {'background-color' : '#fcf2a7'};
 					}
 					else if (incidentCode.charAt(0) == 1 && (incidentCode.charAt(1) == 3) || incidentCode.charAt(1) == 8)
 					{
-						return {'background-color' : '7FFA57'};
+						return {'background-color' : '#78f599'};
 					}
 					else if (incidentCode.charAt(0) == 9 && incidentCode.length == 3)
 					{
-						return {'background-color' : '#EDF661'};
+						return {'background-color' : '#fcf2a7'};
 					}
-					else { return {'background-color' : '#7FFA57'}};
+					else { return {'background-color' : '#78f599'}};
 				}
 			},
 			mounted (){

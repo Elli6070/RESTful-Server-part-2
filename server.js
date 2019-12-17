@@ -33,6 +33,31 @@ app.get('/', (req, res) => {
 	res.sendFile(client_file);
 });
 
+app.get('/client.html', (req, res) => {
+	res.sendFile(path.join(__dirname, "docs/client.html"));
+});
+
+app.get('/style.css', (req, res) => {
+	res.sendFile(path.join(__dirname, "docs/style.css"));
+});
+
+app.get('/about.html', (req, res) => {
+	res.sendFile(path.join(__dirname, "docs/about.html"));
+});
+
+app.get('/example.mp4', (req, res) =>{
+    res.sendFile(path.join(__dirname, "docs/example.mp4"));
+})
+
+app.get('/DrewPhoto.jpg', (req, res) =>{
+    res.sendFile(path.join(__dirname, "docs/DrewPhoto.jpg"));
+})
+
+app.get('/Alexpicture.jpg', (req, res) =>{
+    res.sendFile(path.join(__dirname, "docs/Alexpicture.jpg"));
+})
+
+
 app.get('/codes', (req, res) => {
     var codes = {};
     
